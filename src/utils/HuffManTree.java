@@ -23,15 +23,13 @@ import sortedList.SortedList;
 public class HuffManTree {
 
 	public static void main(String[] args) {
-		String loadData = load_data("stringData.txt");
+		String loadData = load_data("stringData6.txt");
 		if (loadData == null) {
-			System.out.println("Data cannot be empty, must contain something.");
+			System.out.println("The text file cannot be empty.");
 		} else {
 			Map<String, Integer> computeFD = compute_fd(loadData);
-
 			// uncomment to see the tree
-			BTNode<String, Integer> huffManTree = huffman_tree(computeFD);
-
+			BTNode<Integer, String> huffManTree = huffman_tree(computeFD);
 			Map<String, String> huffManCode = huffman_code(huffManTree);
 			String output = encode(huffManCode, loadData);
 			process_results(computeFD, huffManCode, loadData, output);
@@ -66,10 +64,10 @@ public class HuffManTree {
 
 	/**
 	 *
-	 * loops through the input string and if the hashtable already contains that
+	 * Loops through the input string and if the hashtable already contains that
 	 * character in the input, we add 1 to the frequency of said character.
 	 * 
-	 * else, it is the first time we see that character so we set the frequency to
+	 * Else, it is the first time we see that character so we set the frequency to
 	 * one.
 	 *
 	 * @param input text file string
@@ -100,50 +98,50 @@ public class HuffManTree {
 	 * @return the frequencies of the keys
 	 * 
 	 */
-	public static BTNode<String, Integer> huffman_tree(Map<String, Integer> map) {
-		SortedList<BTNode<String, Integer>> sL = new SortedArrayList<BTNode<String, Integer>>(map.size());
+	public static BTNode<Integer, String> huffman_tree(Map<String, Integer> map) {
+		SortedList<BTNode<Integer, String>> sL = new SortedArrayList<BTNode<Integer, String>>(map.size());
 
 		for (String k : map.getKeys()) {
-			sL.add(new BTNode<String, Integer>(k, map.get(k)));
+			sL.add(new BTNode<Integer, String>(map.get(k), k));
 		}
 		for (int i = sL.size() - 1; i >= 1; i--) {
-			BTNode<String, Integer> l = sL.removeIndex(0);
-			BTNode<String, Integer> r = sL.removeIndex(0);
-			int nodeFreq = l.getValue() + r.getValue();
-			String nodeSymbol = l.getKey() + r.getKey();
-			BTNode<String, Integer> dad = new BTNode<String, Integer>(nodeSymbol, nodeFreq);
+			BTNode<Integer, String> l = sL.removeIndex(0);
+			BTNode<Integer, String> r = sL.removeIndex(0);
+			int nodeFreq = l.getKey() + r.getKey();
+			String nodeSymbol = l.getValue() + r.getValue();
+			BTNode<Integer, String> dad = new BTNode<Integer, String>(nodeFreq, nodeSymbol);
 
 			dad.setLeftChild(l);
 			dad.setRightChild(r);
 			sL.add(dad);
 
 		}
-		BTNode<String, Integer> test = sL.removeIndex(0);
-		BinaryTreePrinter.print(test);
+		BTNode<Integer, String> test = sL.removeIndex(0);
+		// BinaryTreePrinter.print(test);
 		return test;
 
 	}
 
 	/**
 	 *
-	 * calls the method prefix in order to build the key's code
+	 * Calls the method prefix in order to build the key's code.
 	 *
-	 * @param N a node in the huffman tree
+	 * @param huffManTree a node in the huffman tree
 	 * @return the frequencies of the keys
 	 * 
 	 */
-	public static Map<String, String> huffman_code(BTNode<String, Integer> N) {
+	public static Map<String, String> huffman_code(BTNode<Integer, String> huffManTree) {
 		Map<String, String> map = new HashTableSC<>(new SimpleHashFunction<>());
 		String code = "";
-		prefix(N, map, code);
+		prefix(huffManTree, map, code);
 		return map;
 
 	}
 
 	/**
 	 *
-	 * first checks if it's a leaf and if it is then just add that key with it's
-	 * corresponding code to the map. if it's not a leaf then recursively travel
+	 * First checks if it's a leaf and if it is then just add that key with it's
+	 * corresponding code to the map. If it's not a leaf then recursively travel
 	 * through the nodes adding 1s and 0s to it's code depending on the path taken
 	 * to that key.
 	 *
@@ -152,9 +150,9 @@ public class HuffManTree {
 	 * @param code a string that contains the key's code in 0s and 1s
 	 * 
 	 */
-	public static void prefix(BTNode<String, Integer> N, Map<String, String> map, String code) {
+	public static void prefix(BTNode<Integer, String> N, Map<String, String> map, String code) {
 		if (N.getLeftChild() == null && N.getRightChild() == null) {
-			map.put(N.getKey(), code);
+			map.put(N.getValue(), code);
 		} else {
 			prefix(N.getLeftChild(), map, code + "0");
 			prefix(N.getRightChild(), map, code + "1");
@@ -166,8 +164,8 @@ public class HuffManTree {
 	 * Converts the input to it's corresponding code
 	 *
 	 * @param map  a map containing the symbol mapping to it's code
-	 * @param data the location of the image, relative to the url argument
-	 * @return a string
+	 * @param data contains the input file words
+	 * @return a string that contains the key's code in 0s and 1s
 	 */
 	public static String encode(Map<String, String> map, String data) {
 		String code = "";
@@ -182,29 +180,29 @@ public class HuffManTree {
 
 	/**
 	 *
-	 * first we loop through the keys on the map containing the keys and their
+	 * First we loop through the keys on the map containing the keys and their
 	 * frequencies and creates a new node with the keys and adds that node to the
 	 * sorted list.
 	 *
-	 * loop again through the sorted list and then assign each node to a variable.
+	 * Loop again through the sorted list and then assign each node to a variable.
 	 * extract the key, the value from the node and the code from the encoded map.
 	 * 
 	 *
 	 * @param frequencyDistribution map containing a key with its frequency
 	 * @param encoded               map containing the key and its code
-	 * @param data                  node containing a key and its frequency
-	 * @param result                node containing a key and its frequency
+	 * @param data                  contains the input file words
+	 * @param result                data converted into 0s and 1s
 	 * 
 	 */
 	public static void process_results(Map<String, Integer> frequencyDistribution, Map<String, String> encoded,
 			String data, String result) {
 
-		SortedArrayList<BTNode<String, Integer>> sL = new SortedArrayList<BTNode<String, Integer>>(
+		SortedArrayList<BTNode<Integer, String>> sL = new SortedArrayList<BTNode<Integer, String>>(
 				frequencyDistribution.size());
 
 		// Sort the nodes in the map
 		for (String k : frequencyDistribution.getKeys()) {
-			BTNode<String, Integer> N = new BTNode<String, Integer>(k, frequencyDistribution.get(k));
+			BTNode<Integer, String> N = new BTNode<Integer, String>(frequencyDistribution.get(k), k);
 			sL.add(N);
 		}
 
@@ -212,8 +210,8 @@ public class HuffManTree {
 		System.out.println("------" + "\t" + "---------" + "\t" + "----");
 
 		for (int i = sL.size() - 1; i >= 0; i--) {
-			BTNode<String, Integer> N = sL.get(i);
-			System.out.println(N.getKey() + "\t" + N.getValue() + "\t\t" + encoded.get(N.getKey()));
+			BTNode<Integer, String> N = sL.get(i);
+			System.out.println(N.getKey() + "\t" + N.getValue() + "\t\t" + encoded.get(N.getValue()));
 		}
 
 		System.out.println("Original String:");

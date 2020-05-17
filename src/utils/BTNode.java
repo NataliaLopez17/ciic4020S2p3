@@ -110,12 +110,12 @@ public class BTNode<K extends Comparable<? super K>, V extends Comparable<? supe
 	 */
 	@Override
 	public int compareTo(BTNode<K, V> o) {
-		int num = this.getValue().compareTo(o.getValue());
+		int num = this.getKey().compareTo(o.getKey());
 
 		if (num != 0) {
 			return num;
 		}
-		return this.getKey().compareTo(o.getKey());
+		return this.getValue().compareTo(o.getValue());
 	}
 
 }
